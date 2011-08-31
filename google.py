@@ -30,10 +30,12 @@ class CalculatorResult:
     def __init__(self):
         self.value = None
         self.unit = None
+        self.expr = None
+        self.result = None
         self.fullstring = None
        
     def __repr__(self):
-        return repr([self.value, self.unit, self.fullstring])
+        return repr([self.value, self.unit, self.expr, self.result, self.fullstring])
         
 """
 Defines the public static api methods
@@ -46,7 +48,7 @@ class Google:
     def search(query, pages = 1):
         results = []
         for i in range(pages):
-            url = Google.get_search_url(query, i)
+            url = get_search_url(query, i)
             html = get_html(url)
             if html:
                 soup = BeautifulSoup(html)
@@ -74,7 +76,7 @@ class Google:
     """
     @staticmethod
     def calculate(expr):
-        url = Google.get_search_url(expr)
+        url = get_search_url(expr)
         html = get_html(url)
         if html:
             soup = BeautifulSoup(html)
@@ -86,19 +88,21 @@ class Google:
                     if h2:
                         return parse_calc_result(h2.text)
         return None    
-        
-    @staticmethod    
-    def get_search_url(query, page = 0, per_page = 10):
-        # note: num per page might not be supported by google anymore
-        query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
-        return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (query, page * per_page, per_page)
+ 
+ 
+def get_search_url(query, page = 0, per_page = 10):
+    # note: num per page might not be supported by google anymore
+    query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
+    return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (query, page * per_page, per_page)
 
 def parse_calc_result(string):
     result = CalculatorResult()
     result.fullstring = string
     string = string.strip().replace(u"\xa0", " ")
     if string.find("=") != -1:
+        result.expr = string[:string.rfind("=")].strip()
         string = string[string.rfind("=") + 2:]
+        result.result = string
     tokens = string.split(" ")
     if len(tokens) > 0:
         result.value = ""
