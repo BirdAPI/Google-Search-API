@@ -83,7 +83,7 @@ class Google:
             topstuff = soup.find("div", id="topstuff")
             if topstuff:
                 a = topstuff.find("a")
-                if a["href"].find("calculator") != -1:
+                if a and a["href"].find("calculator") != -1:
                     h2 = topstuff.find("h2")
                     if h2:
                         return parse_calc_result(h2.text)
