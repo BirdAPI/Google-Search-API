@@ -111,7 +111,7 @@ def parse_calc_result(string):
                 result.value = result.value + token
             else:
                 if result.unit:
-                    result.unit = result.unit + token
+                    result.unit = result.unit + " " + token
                 else:
                     result.unit = token
         return result
