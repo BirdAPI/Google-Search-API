@@ -63,6 +63,9 @@ class Google:
                 a = li.find("a")
                 res.name = a.text.strip()
                 res.link = a["href"]
+                if res.link.startswith("/search?"):
+                    # this is not an external link, so skip it
+                    continue
                 sdiv = li.find("div", attrs = { "class" : "s" })
                 if sdiv:
                     res.description = sdiv.text.strip()
@@ -85,7 +88,7 @@ class Google:
 
 def main():
     print "__main__"
-    results = Google.search("testing, testing, 123")
+    results = Google.search("wikipedia")
     for result in results:
         print result, "\n"
         
