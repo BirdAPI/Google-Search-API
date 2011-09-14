@@ -188,39 +188,6 @@ class Google:
                             results.append(res)
                             j = j + 1
         return results
-
-#OLD WAY OF PARSING USING THE HTML, WHICH DOESNT WORK BECAUSE OF NOT HAVING A JAVASCRIPT ENGINE        
-# images = soup.findAll("td", id=re.compile("tDataImage.+"))
-# j = 0
-# for image in images:
-    # print image
-    # res = ImageResult()
-    # res.page = i
-    # res.index = j
-    # id = image["id"].replace("tDataImage", "")
-    # a = image.find("a")
-    # if a:
-        # match = re.search("imgurl=(?P<link>[^&]+)&imgrefurl", a["href"])
-        # if match:
-            # res.link = match.group("link")
-    # img = image.find("img")
-    # if img:
-        # res.thumb = img["src"]
-    # txtID = "tDataText" + id
-    # txtNode = soup.find("td", id=txtID)
-    # if txtNode:
-        # a = txtNode.find("div", "a")
-        # if a:
-            # res.domain = a.text.strip()
-        # f = txtNode.find("div", "f")
-        # if f:
-            # match = re.search("(?P<width>[0-9]+) x (?P<height>[0-9]+) - (?P<size>[^ ]+) - (?P<format>[^ ]+)", f.text.strip())
-            # if match:
-                # res.width = match.group("width")
-                # res.height = match.group("height")
-                # res.filesize = match.group("size")
-                # res.format = match.group("format")
-               
  
 def get_search_url(query, page = 0, per_page = 10):
     # note: num per page might not be supported by google anymore (because of google instant)
