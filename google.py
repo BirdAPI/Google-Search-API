@@ -36,7 +36,20 @@ class CalculatorResult:
        
     def __repr__(self):
         return repr([self.value, self.unit, self.expr, self.result, self.fullstring])
-        
+
+"""
+Represents a google image search result
+"""
+class ImageResult:  
+    def __init__(self):
+        self.name = None
+        self.link = None
+        self.thumb = None
+        self.width = None
+        self.height = None
+        self.page = None
+        self.index = None
+
 """
 Defines the public static api methods
 """
@@ -87,14 +100,45 @@ class Google:
                     h2 = topstuff.find("h2")
                     if h2:
                         return parse_calc_result(h2.text)
-        return None    
- 
+        return None 
+
+    @staticmethod
+    def image_search(query, pages = 1, ):
+        url = get_image_search_url(query)
+        html = get_html(url)
+        if html:
+            soup = BeautifulSoup(html)
+        return None
  
 def get_search_url(query, page = 0, per_page = 10):
-    # note: num per page might not be supported by google anymore
+    # note: num per page might not be supported by google anymore (because of google instant)
     query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
     return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (query, page * per_page, per_page)
 
+def get_image_search_url(query, image_type=None, size_category=None, larger_than=None, exact_width=None, exact_height=None, color_type=None, color=None):
+    query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
+    url = "http://images.google.com/images?q=%s" % (query)
+    tbs = ""
+    if image_type:
+        tbs = tbs+"itp:"+image_type+","
+    if size_category and not (larger_than or (exact_width and exact_height)): 
+        # i = icon, l = large, m = medium, lt = larger than, ex = exact
+        tbs = tbs+"isz:"+size_category+","
+    if larger_than:   
+        # qsvga,4mp
+        tbs = tbs+"isz:lt,islt:"+larger_than+","
+    if exact_width and exact_height:
+        tbs = tbs+"isz:ex,iszw:"+exact_width+",iszh:"+exact_height+","
+    if color_type and not color:
+        # color = color, gray = black and white, specific = user defined
+        tbs = tbs+"ic:"+color_type+","
+    if color:
+        tbs = tbs+"ic:specific,isc:"+color+","
+    if tbs != "":
+        tbs = "&tbs="+tbs[:len(tbs)-1] # remove the last comma
+        url = url+tbs
+    return url
+    
 def parse_calc_result(string):
     result = CalculatorResult()
     result.fullstring = string
@@ -145,3 +189,4 @@ def main():
         
 if __name__ == "__main__":
     main()
+    
