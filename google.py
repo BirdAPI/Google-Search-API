@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from BeautifulSoup import BeautifulSoup
+import unicodedata
 import urllib2
 import sys
 import re
@@ -47,9 +48,58 @@ class ImageResult:
         self.thumb = None
         self.width = None
         self.height = None
+        self.filesize = None
+        self.format = None
+        self.domain = None
         self.page = None
         self.index = None
 
+    def print_me(self):
+        print "name: " + str(self.name)
+        print "link: " + str(self.link)
+        print "thumb: " + str(self.thumb)
+        print "width: " + str(self.width)
+        print "height: " + str(self.height)
+        print "filesize: " + str(self.filesize)
+        print "format: " + str(self.format)
+        print "domain: " + str(self.domain)
+        print "page: " + str(self.page)
+        print "index: " + str(self.index)
+        
+class ImageOptions:
+    def __init__(self):
+        self.image_type = None
+        self.size_category = None
+        self.larger_than = None
+        self.exact_width = None
+        self.exact_height = None
+        self.color_type = None
+        self.color = None
+        
+    def get_tbs(self):
+        tbs = None
+        if self.image_type:
+            # clipart
+            tbs = add_to_tbs(tbs, "itp", self.image_type)
+        if self.size_category and not (self.larger_than or (self.exact_width and self.exact_height)): 
+            # i = icon, l = large, m = medium, lt = larger than, ex = exact
+            tbs = add_to_tbs(tbs, "isz", self.size_category)
+        if self.larger_than:   
+            # qsvga,4mp
+            tbs = add_to_tbs(tbs, "isz", SizeCategory.LARGER_THAN)
+            tbs = add_to_tbs(tbs, "islt", self.larger_than)
+        if self.exact_width and self.exact_height:
+            tbs = add_to_tbs(tbs, "isz", SizeCategory.EXACTLY)
+            tbs = add_to_tbs(tbs, "iszw", self.exact_width)
+            tbs = add_to_tbs(tbs, "iszh", self.exact_height)
+        if self.color_type and not self.color:
+            # color = color, gray = black and white, specific = user defined
+            tbs = add_to_tbs(tbs, "ic", self.color_type)
+        if self.color:
+            tbs = add_to_tbs(tbs, "ic", ColorType.SPECIFIC)
+            tbs = add_to_tbs(tbs, "isc", self.color)
+        return tbs
+        
 """
 Defines the public static api methods
 """
@@ -103,41 +153,133 @@ class Google:
         return None 
 
     @staticmethod
-    def image_search(query, pages = 1, ):
-        url = get_image_search_url(query)
-        html = get_html(url)
-        if html:
-            soup = BeautifulSoup(html)
-        return None
+    def image_search(query, image_options = None, pages = 1):
+        results = []
+        for i in range(pages):
+            url = get_image_search_url(query, image_options, i)
+            html = get_html(url)
+            if html:
+                j = 0
+                soup = BeautifulSoup(html)
+                match = re.search("dyn.setResults\((.+)\);</script>", html)
+                if match:
+                    init = unicode(match.group(1), errors="ignore")
+                    tokens = init.split('],[')
+                    for token in tokens:
+                        res = ImageResult()
+                        res.page = i
+                        res.index = j
+                        toks = token.split(",")
+                        if len(toks) == 32:
+                            for t in range(len(toks)):
+                                toks[t] = toks[t].replace('\\x3cb\\x3e','').replace('\\x3c/b\\x3e','').replace('\\x3d','=').replace('\\x26','&')
+                            match = re.search("imgurl=(?P<link>[^&]+)&imgrefurl", toks[0])
+                            if match:
+                                res.link = match.group("link")
+                            res.name = toks[6].replace('"', '')
+                            res.thumb = toks[21].replace('"', '')
+                            res.format = toks[10].replace('"', '')
+                            res.domain = toks[11].replace('"', '')
+                            match = re.search("(?P<width>[0-9]+) &times; (?P<height>[0-9]+) - (?P<size>[^ ]+)", toks[9].replace('"', ''))
+                            if match:
+                                res.width = match.group("width")
+                                res.height = match.group("height")
+                                res.filesize = match.group("size")                                
+                            results.append(res)
+                            j = j + 1
+        return results
+
+#OLD WAY OF PARSING USING THE HTML, WHICH DOESNT WORK BECAUSE OF NOT HAVING A JAVASCRIPT ENGINE        
+# images = soup.findAll("td", id=re.compile("tDataImage.+"))
+# j = 0
+# for image in images:
+    # print image
+    # res = ImageResult()
+    # res.page = i
+    # res.index = j
+    # id = image["id"].replace("tDataImage", "")
+    # a = image.find("a")
+    # if a:
+        # match = re.search("imgurl=(?P<link>[^&]+)&imgrefurl", a["href"])
+        # if match:
+            # res.link = match.group("link")
+    # img = image.find("img")
+    # if img:
+        # res.thumb = img["src"]
+    # txtID = "tDataText" + id
+    # txtNode = soup.find("td", id=txtID)
+    # if txtNode:
+        # a = txtNode.find("div", "a")
+        # if a:
+            # res.domain = a.text.strip()
+        # f = txtNode.find("div", "f")
+        # if f:
+            # match = re.search("(?P<width>[0-9]+) x (?P<height>[0-9]+) - (?P<size>[^ ]+) - (?P<format>[^ ]+)", f.text.strip())
+            # if match:
+                # res.width = match.group("width")
+                # res.height = match.group("height")
+                # res.filesize = match.group("size")
+                # res.format = match.group("format")
+               
  
 def get_search_url(query, page = 0, per_page = 10):
     # note: num per page might not be supported by google anymore (because of google instant)
     query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
     return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (query, page * per_page, per_page)
 
-def get_image_search_url(query, image_type=None, size_category=None, larger_than=None, exact_width=None, exact_height=None, color_type=None, color=None):
+class ImageType:
+    NONE = None
+    FACE = "face"
+    PHOTO = "photo"
+    CLIPART = "clipart"
+    LINE_DRAWING = "lineart"
+    
+class SizeCategory:
+    NONE = None
+    ICON = "i"
+    LARGE = "l"
+    MEDIUM = "m"
+    SMALL = "s"
+    LARGER_THAN = "lt"
+    EXACTLY = "ex"
+    
+class LargerThan:
+    NONE = None
+    QSVGA = "qsvga" # 400300
+    VGA = "vga"     # 640480
+    SVGA = "svga"   # 800600
+    XGA = "xga"     # 1024768
+    MP_2 = "2mp"    # 2 MP (16001200)
+    MP_4 = "4mp"    # 4 MP (22721704)
+    MP_6 = "6mp"    # 6 MP (28162112)
+    MP_8 = "8mp"    # 8 MP (32642448)
+    MP_10 = "10mp"  # 10 MP (36482736)
+    MP_12 = "12mp"  # 12 MP (40963072)
+    MP_15 = "15mp"  # 15 MP (44803360)
+    MP_20 = "20mp"  # 20 MP (51203840)
+    MP_40 = "40mp"  # 40 MP (72165412)
+    MP_70 = "70mp"  # 70 MP (96007200)
+
+class ColorType:
+    NONE = None
+    COLOR = "color"
+    BLACK_WHITE = "gray"
+    SPECIFIC = "specific"
+    
+def get_image_search_url(query, image_options=None, page=0, per_page=20):
     query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
-    url = "http://images.google.com/images?q=%s" % (query)
-    tbs = ""
-    if image_type:
-        tbs = tbs+"itp:"+image_type+","
-    if size_category and not (larger_than or (exact_width and exact_height)): 
-        # i = icon, l = large, m = medium, lt = larger than, ex = exact
-        tbs = tbs+"isz:"+size_category+","
-    if larger_than:   
-        # qsvga,4mp
-        tbs = tbs+"isz:lt,islt:"+larger_than+","
-    if exact_width and exact_height:
-        tbs = tbs+"isz:ex,iszw:"+exact_width+",iszh:"+exact_height+","
-    if color_type and not color:
-        # color = color, gray = black and white, specific = user defined
-        tbs = tbs+"ic:"+color_type+","
-    if color:
-        tbs = tbs+"ic:specific,isc:"+color+","
-    if tbs != "":
-        tbs = "&tbs="+tbs[:len(tbs)-1] # remove the last comma
-        url = url+tbs
+    url = "http://images.google.com/images?q=%s&sa=N&start=%i&ndsp=%i&sout=1" % (query, page * per_page, per_page)
+    if image_options:
+        tbs = image_options.get_tbs()
+        if tbs:
+            url = url + tbs
     return url
+    
+def add_to_tbs(tbs, name, value):
+    if tbs:
+        return "%s,%s:%s" % (tbs, name, value)
+    else:
+        return "&tbs=%s:%s" % (name, value) 
     
 def parse_calc_result(string):
     result = CalculatorResult()
@@ -183,9 +325,14 @@ def main():
     print Google.calculate("157.3kg in grams")
     print Google.calculate("cos(25 pi) / 17.4")
     print "\n\n"
-    results = Google.search("wikipedia")
+    options = ImageOptions()
+    options.image_type = ImageType.CLIPART
+    options.larger_than = LargerThan.MP_4
+    options.color = "green"
+    results = Google.image_search("banana", options)
     for result in results:
-        print result, "\n"
+        result.print_me()
+        print "\n\n"
         
 if __name__ == "__main__":
     main()
