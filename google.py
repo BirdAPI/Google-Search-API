@@ -1,13 +1,16 @@
 #!/usr/bin/python
 
 from BeautifulSoup import BeautifulSoup
-import unicodedata
+from pprint import pprint
+import os
+import threading
+import urllib
 import urllib2
 import sys
 import re
 
 __author__ = "Anthony Casagrande <birdapi@gmail.com>"
-__version__ = "0.7"
+__version__ = "0.8"
 
 """
 Represents a standard google search result
@@ -21,9 +24,7 @@ class GoogleResult:
         self.cached = None
         self.page = None
         self.index = None
-
-    def __repr__(self):
-        return repr([self.name, self.link, self.description, self.thumb, self.cached, self.page, self.index])
+        
 """
 Represents a result returned from google calculator
 """        
@@ -34,9 +35,6 @@ class CalculatorResult:
         self.expr = None
         self.result = None
         self.fullstring = None
-       
-    def __repr__(self):
-        return repr([self.value, self.unit, self.expr, self.result, self.fullstring])
 
 """
 Represents a google image search result
@@ -53,18 +51,6 @@ class ImageResult:
         self.domain = None
         self.page = None
         self.index = None
-
-    def print_me(self):
-        print "name: " + str(self.name)
-        print "link: " + str(self.link)
-        print "thumb: " + str(self.thumb)
-        print "width: " + str(self.width)
-        print "height: " + str(self.height)
-        print "filesize: " + str(self.filesize)
-        print "format: " + str(self.format)
-        print "domain: " + str(self.domain)
-        print "page: " + str(self.page)
-        print "index: " + str(self.index)
         
 class ImageOptions:
     def __init__(self):
@@ -153,7 +139,7 @@ class Google:
         return None 
 
     @staticmethod
-    def image_search(query, image_options = None, pages = 1):
+    def search_images(query, image_options = None, pages = 1):
         results = []
         for i in range(pages):
             url = get_image_search_url(query, image_options, i)
@@ -170,7 +156,10 @@ class Google:
                         res.page = i
                         res.index = j
                         toks = token.split(",")
-                        if len(toks) == 32:
+                        
+                        # should be 32 or 33, but seems to change, so just make sure no exceptions
+                        # will be thrown by the indexing
+                        if (len(toks) > 22):
                             for t in range(len(toks)):
                                 toks[t] = toks[t].replace('\\x3cb\\x3e','').replace('\\x3c/b\\x3e','').replace('\\x3d','=').replace('\\x26','&')
                             match = re.search("imgurl=(?P<link>[^&]+)&imgrefurl", toks[0])
@@ -184,7 +173,7 @@ class Google:
                             if match:
                                 res.width = match.group("width")
                                 res.height = match.group("height")
-                                res.filesize = match.group("size")                                
+                                res.filesize = match.group("size")        
                             results.append(res)
                             j = j + 1
         return results
@@ -212,20 +201,20 @@ class SizeCategory:
     
 class LargerThan:
     NONE = None
-    QSVGA = "qsvga" # 400300
-    VGA = "vga"     # 640480
-    SVGA = "svga"   # 800600
-    XGA = "xga"     # 1024768
-    MP_2 = "2mp"    # 2 MP (16001200)
-    MP_4 = "4mp"    # 4 MP (22721704)
-    MP_6 = "6mp"    # 6 MP (28162112)
-    MP_8 = "8mp"    # 8 MP (32642448)
-    MP_10 = "10mp"  # 10 MP (36482736)
-    MP_12 = "12mp"  # 12 MP (40963072)
-    MP_15 = "15mp"  # 15 MP (44803360)
-    MP_20 = "20mp"  # 20 MP (51203840)
-    MP_40 = "40mp"  # 40 MP (72165412)
-    MP_70 = "70mp"  # 70 MP (96007200)
+    QSVGA = "qsvga" # 400 x 300
+    VGA = "vga"     # 640 x 480
+    SVGA = "svga"   # 800 x 600
+    XGA = "xga"     # 1024 x 768
+    MP_2 = "2mp"    # 2 MP (1600 x 1200)
+    MP_4 = "4mp"    # 4 MP (2272 x 1704)
+    MP_6 = "6mp"    # 6 MP (2816 x 2112)
+    MP_8 = "8mp"    # 8 MP (3264 x 2448)
+    MP_10 = "10mp"  # 10 MP (3648 x 2736)
+    MP_12 = "12mp"  # 12 MP (4096 x 3072)
+    MP_15 = "15mp"  # 15 MP (4480 x 3360)
+    MP_20 = "20mp"  # 20 MP (5120 x 3840)
+    MP_40 = "40mp"  # 40 MP (7216 x 5412)
+    MP_70 = "70mp"  # 70 MP (9600 x 7200)
 
 class ColorType:
     NONE = None
@@ -288,17 +277,17 @@ def get_html(url):
         return None        
         
 def main():
-    print "__main__"
-    print Google.calculate("157.3kg in grams")
-    print Google.calculate("cos(25 pi) / 17.4")
+    pprint(vars(Google.calculate("157.3kg in grams")))
+    print ""
+    pprint(vars(Google.calculate("cos(25 pi) / 17.4")))
     print "\n\n"
     options = ImageOptions()
     options.image_type = ImageType.CLIPART
     options.larger_than = LargerThan.MP_4
     options.color = "green"
-    results = Google.image_search("banana", options)
+    results = Google.search_images("banana", options)
     for result in results:
-        result.print_me()
+        pprint(vars(result))
         print "\n\n"
         
 if __name__ == "__main__":
