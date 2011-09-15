@@ -36,6 +36,17 @@ class CalculatorResult:
         self.result = None
         self.fullstring = None
 
+class ShoppingResult:
+    def __init__(self):
+        self.name = None
+        self.link = None
+        self.thumb = None
+        self.subtext = None
+        self.description = None
+        self.compare_url = None
+        self.store_count = None
+        self.min_price = None
+
 """
 Represents a google image search result
 """
@@ -177,12 +188,63 @@ class Google:
                             results.append(res)
                             j = j + 1
         return results
+        
+    @staticmethod
+    def shopping(query, pages=1):
+        results = []
+        for i in range(pages):
+            url = get_shopping_url(query, i)
+            html = get_html(url)
+            if html:
+                j = 0
+                soup = BeautifulSoup(html)
+                
+                products = soup.findAll("li", "psli")
+                for prod in products:
+                    res = ShoppingResult()
+                    
+                    divs = prod.findAll("div")
+                    for div in divs:
+                        match = re.search("from (?P<count>[0-9]+) stores", div.text.strip())
+                        if match:
+                            res.store_count = match.group("count")
+                            break
+                    
+                    h3 = prod.find("h3", "r")
+                    if h3:
+                        a = h3.find("a")
+                        if a:
+                            res.compare_url = a["href"]
+                        res.name = h3.text.strip()
+                    
+                    psliimg = prod.find("div", "psliimg")
+                    if psliimg:
+                        img = psliimg.find("img")
+                        if img:
+                            res.thumb = img["src"]
+                    
+                    f = prod.find("div", "f")
+                    if f:
+                        res.subtext = f.text.strip()
+                        
+                    price = prod.find("div", "psliprice")
+                    if price:
+                        res.min_price = price.text.strip()
+                    
+                    results.append(res)
+                    j = j + 1
+        return results
+ 
+def normalize_query(query):
+    return query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
  
 def get_search_url(query, page = 0, per_page = 10):
     # note: num per page might not be supported by google anymore (because of google instant)
-    query = query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
-    return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (query, page * per_page, per_page)
+    return "http://www.google.com/search?hl=en&q=%s&start=%i&num=%i" % (normalize_query(query), page * per_page, per_page)
 
+def get_shopping_url(query, page=0, per_page=10):
+    return "http://www.google.com/search?hl=en&q={0}&tbm=shop&start={1}&num={2}".format(normalize_query(query), page * per_page, per_page)
+    
 class ImageType:
     NONE = None
     FACE = "face"
@@ -277,6 +339,10 @@ def get_html(url):
         return None        
         
 def main():
+    results = Google.shopping("Disgaea 4")
+    for result in results:
+        pprint(vars(result))
+        print "\n\n"
     pprint(vars(Google.calculate("157.3kg in grams")))
     print ""
     pprint(vars(Google.calculate("cos(25 pi) / 17.4")))
