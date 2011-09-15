@@ -67,6 +67,7 @@ Sample Result:
          'width': u'3104'}
 
 Filter options:
+        
         ImageOptions:
             image_type # face, body, clipart, line drawing
             size_category # large, small, icon
