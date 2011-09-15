@@ -52,16 +52,29 @@ Perform a google image search on "banana" and filter it:
         options.larger_than = LargerThan.MP_4
         options.color = "green"
         results = Google.search_images("banana", options)
+        
+Sample Result:
+
+        {'domain': u'exitrealworld.com',
+         'filesize': u'4054k',
+         'format': u'jpg',
+         'height': u'3103',
+         'index': 0,
+         'link': u'http://www.exitrealworld.com/tools_v2/resources/9e55471ba84686ade677ffe595c45992/upload_images/YELLOW_BANANA.jpg',
+         'name': u'Lib Tech Skate Banana BTX',
+         'page': 0,
+         'thumb': u'http://t3.gstatic.com/images?q=tbn:ANd9GcRzvAUW0en9eZTag3giWelcQ_xbrnBMXVChb3RU3v4HtEgxN3RMS0bSdidf',
+         'width': u'3104'}
 
 Filter options:
-
-        image_type # face, body, clipart, line drawing
-        size_category # large, small, icon
-        larger_than # the well known name of the smallest image size you want
-        exact_width # the exact width of the image you want
-        exact_height # the exact height of the image you want
-        color_type # color, b&w, specific
-        color # blue, green, red
+        ImageOptions:
+            image_type # face, body, clipart, line drawing
+            size_category # large, small, icon
+            larger_than # the well known name of the smallest image size you want
+            exact_width # the exact width of the image you want
+            exact_height # the exact height of the image you want
+            color_type # color, b&w, specific
+            color # blue, green, red
         
 Enums of values that can be used to filter image searches:
 
