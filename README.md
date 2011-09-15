@@ -26,13 +26,16 @@ You can search google web in the following way:
 Attempts to search google calculator for the result of an expression. Returns a `CalculatorResult` if successful or `None` if it fails.
 
 `Google.calculate("157.3kg in grams")`
+
         {'expr': u'157.3 kilograms',
          'fullstring': u'157.3 kilograms = 157\xa0300 grams',
          'result': u'157 300 grams',
          'unit': u'grams',
          'value': u'157300'}
 
+         
 `Google.calculate("cos(25 pi) / 17.4")`
+
         {'expr': u'cos(25 * pi) / 17.4',
          'fullstring': u'cos(25 * pi) / 17.4 = -0.0574712644',
          'result': u'-0.0574712644',
@@ -43,6 +46,7 @@ Attempts to search google calculator for the result of an expression. Returns a 
 Searches google images for a list of images.  Image searches can be filtered to produce better results.
 
 Perform a google image search on "banana" and filter it:
+
         options = ImageOptions()
         options.image_type = ImageType.CLIPART
         options.larger_than = LargerThan.MP_4
@@ -50,6 +54,7 @@ Perform a google image search on "banana" and filter it:
         results = Google.search_images("banana", options)
 
 Filter options:
+
         image_type # face, body, clipart, line drawing
         size_category # large, small, icon
         larger_than # the well known name of the smallest image size you want
@@ -59,6 +64,7 @@ Filter options:
         color # blue, green, red
         
 Enums of values that can be used to filter image searches:
+
         class ImageType:
             NONE = None
             FACE = "face"
