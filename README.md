@@ -8,7 +8,9 @@ Google Search API is a python based library for searching various functionalitie
 ## Google Web Search
 You can search google web in the following way:
 
-`search_results = Google.search("This is my query")`
+    ```python
+    search_results = Google.search("This is my query")
+    ```
 
 `search_results` will contain a list of `GoogleResult` objects
 
@@ -27,7 +29,9 @@ You can search google web in the following way:
 ## Google Calculator
 Attempts to search google calculator for the result of an expression. Returns a `CalculatorResult` if successful or `None` if it fails.
 
-`Google.calculate("157.3kg in grams")`
+    ```python
+    Google.calculate("157.3kg in grams")
+    ```
     
     ```python
     {'expr': u'157.3 kilograms',
@@ -38,7 +42,9 @@ Attempts to search google calculator for the result of an expression. Returns a 
     ```
 
     
-`Google.calculate("cos(25 pi) / 17.4")`
+    ```python
+    Google.calculate("cos(25 pi) / 17.4")
+    ```
 
     ```python
     {'expr': u'cos(25 * pi) / 17.4',
