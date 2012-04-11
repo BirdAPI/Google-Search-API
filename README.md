@@ -174,7 +174,7 @@ print "dollars -> pesos exchange rate = {0}".format(rate)
 dollars -> pesos exchange rate = 13.1580679
 ```
 
-Perform your own math. The following 2 statements equal:
+Perform your own math. The following 2 statements are equal:
 
 ```python
 5.0 * Google.exchange_rate("USD", "EUR")

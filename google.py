@@ -9,9 +9,13 @@ import urllib
 import urllib2
 import sys
 import re
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 __author__ = "Anthony Casagrande <birdapi@gmail.com>"
-__version__ = "0.8"
+__version__ = "0.9"
 
 """
 Represents a standard google search result
@@ -136,7 +140,7 @@ class Google:
     Attempts to use google calculator to calculate the result of expr
     """
     @staticmethod
-    def calculate(expr):
+    def calculate_old(expr):
         url = get_search_url(expr)
         html = get_html(url)
         if html:
@@ -263,6 +267,25 @@ class Google:
     @staticmethod
     def exchange_rate(from_currency, to_currency):
         return Google.convert_currency(1, from_currency, to_currency)
+ 
+    """
+    Attempts to use google calculator to calculate the result of expr
+    """
+    @staticmethod
+    def calculate(expr):
+        conn = httplib.HTTPSConnection("www.google.com")
+        req_url = "/ig/calculator?hl=en&q={0}".format(expr.replace(" ", "%20"))
+        headers = { "User-Agent": "Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101" }
+        conn.request("GET", req_url, "", headers)
+        response = conn.getresponse()
+        j = response.read().decode("utf-8").replace(u"\xa0", "")
+        conn.close()
+        j = re.sub(r"{\s*'?(\w)", r'{"\1', j)
+        j = re.sub(r",\s*'?(\w)", r',"\1', j)
+        j = re.sub(r"(\w)'?\s*:", r'\1":', j)
+        j = re.sub(r":\s*'(\w)'\s*([,}])", r':"\1"\2', j)
+        js = json.loads(j)
+        return parse_calc_result(js["lhs"] + " = " + js["rhs"])
  
 def normalize_query(query):
     return query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
