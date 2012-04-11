@@ -370,8 +370,10 @@ def get_html(url):
 def main():
     euros = Google.convert_currency(5.0, "USD", "EUR")
     print "5.0 USD = {0} EUR".format(euros)
-    euros = Google.convert_currency(1000, "yen", "us dollars")
-    print "1000 yen = {0} us dollars".format(euros)
+    yen = Google.convert_currency(1000, "yen", "us dollars")
+    print "1000 yen = {0} us dollars".format(yen)
+    rate = Google.exchange_rate("dollars", "pesos")
+    print "dollars -> pesos exchange rate = {0}".format(rate)
     results = Google.shopping("Disgaea 4")
     for result in results:
         pprint(vars(result))
