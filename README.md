@@ -148,8 +148,6 @@ euros = Google.convert_currency(5.0, "USD", "EUR")
 print "5.0 USD = {0} EUR".format(euros)
 ```
 
-Prints:
-
 ```python
 5.0 USD = 3.82350692 EUR
 ```
@@ -160,8 +158,6 @@ Convert 1000 Japanese Yen to US Dollars:
 yen = Google.convert_currency(1000, "yen", "us dollars")
 print "1000 yen = {0} us dollars".format(yen)
 ```
-
-Prints:
 
 ```python
 1000 yen = 12.379 us dollars
@@ -174,19 +170,15 @@ rate = Google.exchange_rate("dollars", "pesos")
 print "dollars -> pesos exchange rate = {0}".format(rate)
 ```
 
-Prints:
-
 ```python
 dollars -> pesos exchange rate = 13.1580679
 ```
 
-Perform your own math:
+Perform your own math. The following 2 statements equal:
 
 ```python
 5.0 * Google.exchange_rate("USD", "EUR")
 ```
-
-...is the same as:
 
 ```python
 Google.convert_currency(5.0, "USD", "EUR")
