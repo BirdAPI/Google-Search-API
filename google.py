@@ -4,6 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from pprint import pprint
 import os
 import threading
+import httplib
 import urllib
 import urllib2
 import sys
@@ -234,6 +235,34 @@ class Google:
                     results.append(res)
                     j = j + 1
         return results
+    
+    """
+    Converts one currency to another.
+    [amount] from_curreny = [return_value] to_currency
+    """
+    @staticmethod
+    def convert_currency(amount, from_currency, to_currency):
+        if from_currency == to_currency:
+            return 1.0
+        conn = httplib.HTTPSConnection("www.google.com")
+        req_url = "/ig/calculator?hl=en&q={0}{1}=?{2}".format(amount, from_currency.replace(" ", "%20"), to_currency.replace(" ", "%20"))
+        headers = { "User-Agent": "Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101" }
+        conn.request("GET", req_url, "", headers)
+        response = conn.getresponse()
+        rval = response.read().decode("utf-8").replace(u"\xa0", "")
+        conn.close()
+        rhs = rval.split(",")[1].strip()
+        s = rhs[rhs.find('"')+1:]
+        rate = s[:s.find(" ")]
+        return float(rate)
+        
+    """
+    Gets the exchange rate of one currency to another.
+    1 from_curreny = [return_value] to_currency
+    """
+    @staticmethod
+    def exchange_rate(from_currency, to_currency):
+        return Google.convert_currency(1, from_currency, to_currency)
  
 def normalize_query(query):
     return query.strip().replace(":", "%3A").replace("+", "%2B").replace("&", "%26").replace(" ", "+")
@@ -339,6 +368,10 @@ def get_html(url):
         return None        
         
 def main():
+    euros = Google.convert_currency(5.0, "USD", "EUR")
+    print "5.0 USD = {0} EUR".format(euros)
+    euros = Google.convert_currency(1000, "yen", "us dollars")
+    print "1000 yen = {0} us dollars".format(euros)
     results = Google.shopping("Disgaea 4")
     for result in results:
         pprint(vars(result))
