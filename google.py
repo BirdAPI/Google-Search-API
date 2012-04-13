@@ -106,6 +106,8 @@ class ImageOptions:
 Defines the public static api methods
 """
 class Google:
+    DEBUG_MODE = False
+
     """
     Returns a list of GoogleResult
     """
@@ -116,6 +118,8 @@ class Google:
             url = get_search_url(query, i)
             html = get_html(url)
             if html:
+                if Google.DEBUG_MODE:
+                    write_html_to_file(html, "{0}_{1}.html".format(query.replace(" ", "_"), i))
                 soup = BeautifulSoup(html)
                 lis = soup.findAll("li", attrs = { "class" : "g" })
                 j = 0
@@ -137,7 +141,7 @@ class Google:
         return results
     
     """
-    Attempts to use google calculator to calculate the result of expr
+    OLD WAY OF DOING THIS. Attempts to use google calculator to calculate the result of expr
     """
     @staticmethod
     def calculate_old(expr):
@@ -161,6 +165,8 @@ class Google:
             url = get_image_search_url(query, image_options, i)
             html = get_html(url)
             if html:
+                if Google.DEBUG_MODE:
+                    write_html_to_file(html, "images_{0}_{1}.html".format(query.replace(" ", "_"), i))
                 j = 0
                 soup = BeautifulSoup(html)
                 match = re.search("dyn.setResults\((.+)\);</script>", html)
@@ -201,10 +207,12 @@ class Google:
             url = get_shopping_url(query, i)
             html = get_html(url)
             if html:
+                if Google.DEBUG_MODE:
+                    write_html_to_file(html, "shopping_{0}_{1}.html".format(query.replace(" ", "_"), i))
                 j = 0
                 soup = BeautifulSoup(html)
                 
-                products = soup.findAll("li", "psli")
+                products = soup.findAll("li", "g")
                 for prod in products:
                     res = ShoppingResult()
                     
@@ -389,30 +397,81 @@ def get_html(url):
     except:
         print "Error accessing:", url
         return None        
+
+def write_html_to_file(html, filename):
+    of = open(filename, "w")
+    of.write(html)
+    of.flush()
+    of.close()
         
-def main():
-    euros = Google.convert_currency(5.0, "USD", "EUR")
-    print "5.0 USD = {0} EUR".format(euros)
-    yen = Google.convert_currency(1000, "yen", "us dollars")
-    print "1000 yen = {0} us dollars".format(yen)
-    rate = Google.exchange_rate("dollars", "pesos")
-    print "dollars -> pesos exchange rate = {0}".format(rate)
-    results = Google.shopping("Disgaea 4")
-    for result in results:
-        pprint(vars(result))
-        print "\n\n"
-    pprint(vars(Google.calculate("157.3kg in grams")))
-    print ""
-    pprint(vars(Google.calculate("cos(25 pi) / 17.4")))
-    print "\n\n"
+def debug():
+    Google.DEBUG_MODE = True
+    print "DEBUG_MODE ENABLED"
+    
+    search = Google.search("github")
+    if search is None or len(search) == 0: 
+        print "ERROR: No Search Results!"
+    else: 
+        print "PASSED: {0} Search Results".format(len(search))
+    
+    shop = Google.shopping("Disgaea 4")
+    if shop is None or len(shop) == 0: 
+        print "ERROR: No Shopping Results!"
+    else: 
+        print "PASSED: {0} Shopping Results".format(len(shop))
+    
     options = ImageOptions()
     options.image_type = ImageType.CLIPART
     options.larger_than = LargerThan.MP_4
     options.color = "green"
-    results = Google.search_images("banana", options)
-    for result in results:
-        pprint(vars(result))
+    images = Google.search_images("banana", options)
+    if images is None or len(images) == 0: 
+        print "ERROR: No Image Results!"
+    else:
+        print "PASSED: {0} Image Results".format(len(images))
+        
+    calc = Google.calculate("157.3kg in grams")
+    if calc is not None and int(calc.value) == 157300:
+        print "PASSED: Calculator passed"
+    else:
+        print "ERROR: Calculator failed!"
+        
+    euros = Google.convert_currency(5.0, "USD", "EUR")
+    if euros is not None and euros > 0.0:
+        print "PASSED: Currency convert passed"
+    else:
+        print "ERROR: Currency convert failed!"
+        
+def main():
+    if sys.argv[1] == "--debug":
+        debug()
+    else:
+        euros = Google.convert_currency(5.0, "USD", "EUR")
+        print "5.0 USD = {0} EUR".format(euros)
+        yen = Google.convert_currency(1000, "yen", "us dollars")
+        print "1000 yen = {0} us dollars".format(yen)
+        rate = Google.exchange_rate("dollars", "pesos")
+        print "dollars -> pesos exchange rate = {0}".format(rate)
+        results = Google.search("github")
+        for result in results:
+            pprint(vars(result))
+            print "\n\n"
+        results = Google.shopping("Disgaea 4")
+        for result in results:
+            pprint(vars(result))
+            print "\n\n"
+        pprint(vars(Google.calculate("157.3kg in grams")))
+        print ""
+        pprint(vars(Google.calculate("cos(25 pi) / 17.4")))
         print "\n\n"
+        options = ImageOptions()
+        options.image_type = ImageType.CLIPART
+        options.larger_than = LargerThan.MP_4
+        options.color = "green"
+        results = Google.search_images("banana", options)
+        for result in results:
+            pprint(vars(result))
+            print "\n\n"
         
 if __name__ == "__main__":
     main()
