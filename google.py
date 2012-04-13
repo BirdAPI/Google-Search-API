@@ -60,6 +60,8 @@ class ImageResult:
         self.name = None
         self.link = None
         self.thumb = None
+        self.thumb_width = None
+        self.thumb_height = None
         self.width = None
         self.height = None
         self.filesize = None
@@ -159,7 +161,7 @@ class Google:
         return None 
 
     @staticmethod
-    def search_images(query, image_options = None, pages = 1):
+    def search_images_old(query, image_options = None, pages = 1):
         results = []
         for i in range(pages):
             url = get_image_search_url(query, image_options, i)
@@ -199,7 +201,48 @@ class Google:
                             results.append(res)
                             j = j + 1
         return results
-        
+    
+    @staticmethod
+    def search_images(query, image_options = None, pages = 1):
+        results = []
+        for i in range(pages):
+            url = get_image_search_url(query, image_options, i)
+            html = get_html(url)
+            if html:
+                if Google.DEBUG_MODE:
+                    write_html_to_file(html, "images_{0}_{1}.html".format(query.replace(" ", "_"), i))
+                soup = BeautifulSoup(html)
+                j = 0
+                tds = soup.findAll("td")
+                for td in tds:
+                    a = td.find("a")
+                    if a and a["href"].find("imgurl") != -1:
+                        res = ImageResult()
+                        res.page = i
+                        res.index = j
+                        tokens = a["href"].split("&")
+                        match = re.search("imgurl=(?P<link>[^&]+)", tokens[0])
+                        if match:
+                            res.link = match.group("link")
+                            res.format = res.link[res.link.rfind(".") + 1:]
+                        img = td.find("img")
+                        if img:
+                            res.thumb = img["src"]
+                            res.thumb_width = img["width"]
+                            res.thumb_height = img["height"]
+                        match = re.search("(?P<width>[0-9]+) &times; (?P<height>[0-9]+) - (?P<size>[^&]+)", td.text)
+                        if match:
+                            res.width = match.group("width")
+                            res.name = td.text[:td.text.find(res.width)]
+                            res.height = match.group("height")
+                            res.filesize = match.group("size")
+                        cite = td.find("cite")
+                        if cite:
+                            res.domain = cite["title"]
+                        results.append(res)
+                        j = j + 1
+        return results
+    
     @staticmethod
     def shopping(query, pages=1):
         results = []
@@ -404,10 +447,7 @@ def write_html_to_file(html, filename):
     of.flush()
     of.close()
         
-def debug():
-    Google.DEBUG_MODE = True
-    print "DEBUG_MODE ENABLED"
-    
+def test():
     search = Google.search("github")
     if search is None or len(search) == 0: 
         print "ERROR: No Search Results!"
@@ -443,35 +483,10 @@ def debug():
         print "ERROR: Currency convert failed!"
         
 def main():
-    if sys.argv[1] == "--debug":
-        debug()
-    else:
-        euros = Google.convert_currency(5.0, "USD", "EUR")
-        print "5.0 USD = {0} EUR".format(euros)
-        yen = Google.convert_currency(1000, "yen", "us dollars")
-        print "1000 yen = {0} us dollars".format(yen)
-        rate = Google.exchange_rate("dollars", "pesos")
-        print "dollars -> pesos exchange rate = {0}".format(rate)
-        results = Google.search("github")
-        for result in results:
-            pprint(vars(result))
-            print "\n\n"
-        results = Google.shopping("Disgaea 4")
-        for result in results:
-            pprint(vars(result))
-            print "\n\n"
-        pprint(vars(Google.calculate("157.3kg in grams")))
-        print ""
-        pprint(vars(Google.calculate("cos(25 pi) / 17.4")))
-        print "\n\n"
-        options = ImageOptions()
-        options.image_type = ImageType.CLIPART
-        options.larger_than = LargerThan.MP_4
-        options.color = "green"
-        results = Google.search_images("banana", options)
-        for result in results:
-            pprint(vars(result))
-            print "\n\n"
+    if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+        Google.DEBUG_MODE = True
+        print "DEBUG_MODE ENABLED"
+    test()
         
 if __name__ == "__main__":
     main()
