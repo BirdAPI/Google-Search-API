@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Google-search-api : Python based api for searching google web, images, calc, and currency conversion." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Google-search-api</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/BirdAPI/Google-Search-API">Fork Me on GitHub</a>
+
+          <h1 id="project_title">Google-search-api</h1>
+          <h2 id="project_tagline">Python based api for searching google web, images, calc, and currency conversion.</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/BirdAPI/Google-Search-API/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/BirdAPI/Google-Search-API/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Google Search API</h1>
+
+<p>Google Search API is a python based library for searching various functionalities of google.  It uses screen scraping to retrieve the results, and thus is unreliable if the way google's web pages are returned change in the future.</p>
+
+<p><em>Disclaimer: This software uses screen scraping to retreive search results from google.com, and therefore this software may stop working at any given time.  Use this software at your own risk. I assume no responsibility for how this software API is used by others.</em></p>
+
+<h2>Google Web Search</h2>
+
+<p>You can search google web in the following way:</p>
+
+<div class="highlight">
+<pre><span class="n">search_results</span> <span class="o">=</span> <span class="n">Google</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">"This is my query"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p><code>search_results</code> will contain a list of <code>GoogleResult</code> objects</p>
+
+<div class="highlight">
+<pre><span class="n">GoogleResult</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="c"># The title of the link</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">link</span> <span class="c"># The link url</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="c"># The description of the link</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">thumb</span> <span class="c"># The link to a thumbnail of the website (not implemented yet)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cached</span> <span class="c"># A link to the cached version of the page</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="c"># What page this result was on (When searching more than one page)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="c"># What index on this page it was on</span>
+</pre>
+</div>
+
+
+<h2>Google Calculator</h2>
+
+<p>Attempts to search google calculator for the result of an expression. Returns a <code>CalculatorResult</code> if successful or <code>None</code> if it fails.</p>
+
+<div class="highlight">
+<pre><span class="n">Google</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="s">"157.3kg in grams"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="s">'expr'</span><span class="p">:</span> <span class="s">u'157.3 kilograms'</span><span class="p">,</span>
+ <span class="s">'fullstring'</span><span class="p">:</span> <span class="s">u'157.3 kilograms = 157</span><span class="se">\xa0</span><span class="s">300 grams'</span><span class="p">,</span>
+ <span class="s">'result'</span><span class="p">:</span> <span class="s">u'157 300 grams'</span><span class="p">,</span>
+ <span class="s">'unit'</span><span class="p">:</span> <span class="s">u'grams'</span><span class="p">,</span>
+ <span class="s">'value'</span><span class="p">:</span> <span class="s">u'157300'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="n">Google</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="s">"cos(25 pi) / 17.4"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="s">'expr'</span><span class="p">:</span> <span class="s">u'cos(25 * pi) / 17.4'</span><span class="p">,</span>
+ <span class="s">'fullstring'</span><span class="p">:</span> <span class="s">u'cos(25 * pi) / 17.4 = -0.0574712644'</span><span class="p">,</span>
+ <span class="s">'result'</span><span class="p">:</span> <span class="s">u'-0.0574712644'</span><span class="p">,</span>
+ <span class="s">'unit'</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+ <span class="s">'value'</span><span class="p">:</span> <span class="s">u'-0.0574712644'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<h2>Google Image Search</h2>
+
+<p>Searches google images for a list of images.  Image searches can be filtered to produce better results.</p>
+
+<p>Perform a google image search on "banana" and filter it:</p>
+
+<div class="highlight">
+<pre><span class="n">options</span> <span class="o">=</span> <span class="n">ImageOptions</span><span class="p">()</span>
+<span class="n">options</span><span class="o">.</span><span class="n">image_type</span> <span class="o">=</span> <span class="n">ImageType</span><span class="o">.</span><span class="n">CLIPART</span>
+<span class="n">options</span><span class="o">.</span><span class="n">larger_than</span> <span class="o">=</span> <span class="n">LargerThan</span><span class="o">.</span><span class="n">MP_4</span>
+<span class="n">options</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="s">"green"</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">Google</span><span class="o">.</span><span class="n">search_images</span><span class="p">(</span><span class="s">"banana"</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p>Sample Result:</p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="s">'domain'</span><span class="p">:</span> <span class="s">u'exitrealworld.com'</span><span class="p">,</span>
+ <span class="s">'filesize'</span><span class="p">:</span> <span class="s">u'4054k'</span><span class="p">,</span>
+ <span class="s">'format'</span><span class="p">:</span> <span class="s">u'jpg'</span><span class="p">,</span>
+ <span class="s">'height'</span><span class="p">:</span> <span class="s">u'3103'</span><span class="p">,</span>
+ <span class="s">'index'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+ <span class="s">'link'</span><span class="p">:</span> <span class="s">u'<a href="http://www.exitrealworld.com/tools_v2/resources/9e55471ba84686ade677ffe595c45992/upload_images/YELLOW_BANANA.jpg">http://www.exitrealworld.com/tools_v2/resources/9e55471ba84686ade677ffe595c45992/upload_images/YELLOW_BANANA.jpg</a>'</span><span class="p">,</span>
+ <span class="s">'name'</span><span class="p">:</span> <span class="s">u'Lib Tech Skate Banana BTX'</span><span class="p">,</span>
+ <span class="s">'page'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+ <span class="s">'thumb'</span><span class="p">:</span> <span class="s">u'<a href="http://t3.gstatic.com/images?q=tbn:ANd9GcRzvAUW0en9eZTag3giWelcQ_xbrnBMXVChb3RU3v4HtEgxN3RMS0bSdidf">http://t3.gstatic.com/images?q=tbn:ANd9GcRzvAUW0en9eZTag3giWelcQ_xbrnBMXVChb3RU3v4HtEgxN3RMS0bSdidf</a>'</span><span class="p">,</span>
+ <span class="s">'width'</span><span class="p">:</span> <span class="s">u'3104'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>Filter options:</p>
+
+<div class="highlight">
+<pre><span class="n">ImageOptions</span><span class="p">:</span>
+    <span class="n">image_type</span> <span class="c"># face, body, clipart, line drawing</span>
+    <span class="n">size_category</span> <span class="c"># large, small, icon</span>
+    <span class="n">larger_than</span> <span class="c"># the well known name of the smallest image size you want</span>
+    <span class="n">exact_width</span> <span class="c"># the exact width of the image you want</span>
+    <span class="n">exact_height</span> <span class="c"># the exact height of the image you want</span>
+    <span class="n">color_type</span> <span class="c"># color, b&amp;w, specific</span>
+    <span class="n">color</span> <span class="c"># blue, green, red</span>
+</pre>
+</div>
+
+
+<p>Enums of values that can be used to filter image searches:</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">ImageType</span><span class="p">:</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">FACE</span> <span class="o">=</span> <span class="s">"face"</span>
+    <span class="n">PHOTO</span> <span class="o">=</span> <span class="s">"photo"</span>
+    <span class="n">CLIPART</span> <span class="o">=</span> <span class="s">"clipart"</span>
+    <span class="n">LINE_DRAWING</span> <span class="o">=</span> <span class="s">"lineart"</span>
+
+<span class="k">class</span> <span class="nc">SizeCategory</span><span class="p">:</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">ICON</span> <span class="o">=</span> <span class="s">"i"</span>
+    <span class="n">LARGE</span> <span class="o">=</span> <span class="s">"l"</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="s">"m"</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="s">"s"</span>
+    <span class="n">LARGER_THAN</span> <span class="o">=</span> <span class="s">"lt"</span>
+    <span class="n">EXACTLY</span> <span class="o">=</span> <span class="s">"ex"</span>
+
+<span class="k">class</span> <span class="nc">LargerThan</span><span class="p">:</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">QSVGA</span> <span class="o">=</span> <span class="s">"qsvga"</span> <span class="c"># 400 x 300</span>
+    <span class="n">VGA</span> <span class="o">=</span> <span class="s">"vga"</span>     <span class="c"># 640 x 480</span>
+    <span class="n">SVGA</span> <span class="o">=</span> <span class="s">"svga"</span>   <span class="c"># 800 x 600</span>
+    <span class="n">XGA</span> <span class="o">=</span> <span class="s">"xga"</span>     <span class="c"># 1024 x 768</span>
+    <span class="n">MP_2</span> <span class="o">=</span> <span class="s">"2mp"</span>    <span class="c"># 2 MP (1600 x 1200)</span>
+    <span class="n">MP_4</span> <span class="o">=</span> <span class="s">"4mp"</span>    <span class="c"># 4 MP (2272 x 1704)</span>
+    <span class="n">MP_6</span> <span class="o">=</span> <span class="s">"6mp"</span>    <span class="c"># 6 MP (2816 x 2112)</span>
+    <span class="n">MP_8</span> <span class="o">=</span> <span class="s">"8mp"</span>    <span class="c"># 8 MP (3264 x 2448)</span>
+    <span class="n">MP_10</span> <span class="o">=</span> <span class="s">"10mp"</span>  <span class="c"># 10 MP (3648 x 2736)</span>
+    <span class="n">MP_12</span> <span class="o">=</span> <span class="s">"12mp"</span>  <span class="c"># 12 MP (4096 x 3072)</span>
+    <span class="n">MP_15</span> <span class="o">=</span> <span class="s">"15mp"</span>  <span class="c"># 15 MP (4480 x 3360)</span>
+    <span class="n">MP_20</span> <span class="o">=</span> <span class="s">"20mp"</span>  <span class="c"># 20 MP (5120 x 3840)</span>
+    <span class="n">MP_40</span> <span class="o">=</span> <span class="s">"40mp"</span>  <span class="c"># 40 MP (7216 x 5412)</span>
+    <span class="n">MP_70</span> <span class="o">=</span> <span class="s">"70mp"</span>  <span class="c"># 70 MP (9600 x 7200)</span>
+
+<span class="k">class</span> <span class="nc">ColorType</span><span class="p">:</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">COLOR</span> <span class="o">=</span> <span class="s">"color"</span>
+    <span class="n">BLACK_WHITE</span> <span class="o">=</span> <span class="s">"gray"</span>
+    <span class="n">SPECIFIC</span> <span class="o">=</span> <span class="s">"specific"</span>
+</pre>
+</div>
+
+
+<h2>Google Currency Converter (Exchange Rates)</h2>
+
+<p>Convert between one currency and another using google calculator. Results are real time and can change at any time based on the current exchange rate according to google.</p>
+
+<p>Convert 5 US Dollars to Euros using the official 3 letter currency acronym:</p>
+
+<div class="highlight">
+<pre><span class="n">euros</span> <span class="o">=</span> <span class="n">Google</span><span class="o">.</span><span class="n">convert_currency</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="s">"USD"</span><span class="p">,</span> <span class="s">"EUR"</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">"5.0 USD = {0} EUR"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">euros</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="mf">5.0</span> <span class="n">USD</span> <span class="o">=</span> <span class="mf">3.82350692</span> <span class="n">EUR</span>
+</pre>
+</div>
+
+
+<p>Convert 1000 Japanese Yen to US Dollars:</p>
+
+<div class="highlight">
+<pre><span class="n">yen</span> <span class="o">=</span> <span class="n">Google</span><span class="o">.</span><span class="n">convert_currency</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="s">"yen"</span><span class="p">,</span> <span class="s">"us dollars"</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">"1000 yen = {0} us dollars"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yen</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="mi">1000</span> <span class="n">yen</span> <span class="o">=</span> <span class="mf">12.379</span> <span class="n">us</span> <span class="n">dollars</span>
+</pre>
+</div>
+
+
+<p>Instead you can get the exchange rate which returns what 1 <code>from_currency</code> equals in <code>to_currency</code> and do your own math:</p>
+
+<div class="highlight">
+<pre><span class="n">rate</span> <span class="o">=</span> <span class="n">Google</span><span class="o">.</span><span class="n">exchange_rate</span><span class="p">(</span><span class="s">"dollars"</span><span class="p">,</span> <span class="s">"pesos"</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">"dollars -&gt; pesos exchange rate = {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="n">dollars</span> <span class="o">-&gt;</span> <span class="n">pesos</span> <span class="n">exchange</span> <span class="n">rate</span> <span class="o">=</span> <span class="mf">13.1580679</span>
+</pre>
+</div>
+
+
+<p>Perform your own math. The following 2 statements are equal:</p>
+
+<div class="highlight">
+<pre><span class="mf">5.0</span> <span class="o">*</span> <span class="n">Google</span><span class="o">.</span><span class="n">exchange_rate</span><span class="p">(</span><span class="s">"USD"</span><span class="p">,</span> <span class="s">"EUR"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<div class="highlight">
+<pre><span class="n">Google</span><span class="o">.</span><span class="n">convert_currency</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="s">"USD"</span><span class="p">,</span> <span class="s">"EUR"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p>As a side note, <code>convert_currency</code> is always more accurate than performing your own math on <code>exchange_rate</code> because of possible rounding errors. However if you have more than one value to convert it is best to call <code>exchange_rate</code> and cache the result to use for multiple calculations instead of querying the google server for each one.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Google-search-api maintained by <a href="https://github.com/BirdAPI">BirdAPI</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
